@@ -1,8 +1,26 @@
+/* Arduino Refresh Counter With Timer
+ * 
+ * The Arduino Refresh Counter consists of an Arduino Uno board connected to three breadboards by wires. 
+ * Two of the breadboards are wired with seven LED diodes arranged in the pattern of a seven-segment display 
+ * and the remaining breadboard has a single button. 
+ * 
+ * The purpose of the Reset Counter is to record the number of times the button is clicked over a period of time. 
+ * The two displays initially display the number zero. During a time interval (denoted by timeBase, measured in 
+ * milliseconds) the button can be pressed up to 99 times, and during the following interval the number of 
+ * button presses will be displayed on the two digit display.
+ *  
+ *  Written by Claire Feddema on August 14 2020
+ */
+
 #include <Event.h>
 #include <Timer.h>
 
+// Declarations 
 
+//Creates timer from header file to count milliseconds since program began
 Timer t;
+
+// Pins connected directly to the display's tens digit LEDs
 int leftLED1 = 9;
 int leftLED2 = 11;
 int leftLED3 = 10;
@@ -10,28 +28,40 @@ int leftLED4 = 12;
 int leftLED5 = 7;
 int leftLED6 = 6;
 int leftLED7 = 8;
+
+// Pins connected indirectly to the display's ones digit LEDs through charlieplexing
 int charliePin1 = 5;
 int charliePin2 = 4;
 int charliePin3 = 3;
 int charliePin4 = 2;
 
+// Pin for imput from the button
 int buttonPin = 13;
 
+//Variables to keep track of the button's status (pressed or not) currently and 
+// previously to compare (in order to know when it goes from pressed to unpressed, 
+// which counts as a single button press) 
 int buttonNew;
 int buttonOld = 1;
 
+// Delay variables in milliseconds
 int delayTime = 10;
 int d = 1;
+
+//Keeps track of the amount of times the button is pressed in the current and previous interval
 int count = 0;
 int previousCount = 0;
+
+// The length of each interval in milliseconds
 int timeBase = 3000;
 
-
+//The number currently being displayed in the tens and ones place on the display
 int leftDisplayNum = 0;
 int rightDisplayNum = 0;
 
 
-// charlieplexing for each LED on the right side to turn on 
+// Changes both pin modes and statuses of each pin used in charlieplexing to turn on each
+// of the 7 seperate LEDs on the ones digit of the display
 void rightLED1 () {
   pinMode(charliePin1, OUTPUT);
   pinMode(charliePin2, OUTPUT);
@@ -89,7 +119,8 @@ void rightLED7 () {
   digitalWrite(charliePin4, LOW);
 }
 
-// make left display numbers 0 thorough 9
+// Changes statuses of each pin used for the tens digit of the display 
+// to turn on the correct LEDs and display the numbers 0 though 9
 void leftDisplay0 () {
     digitalWrite(leftLED1, HIGH); 
     digitalWrite(leftLED2, HIGH); 
@@ -181,7 +212,8 @@ void leftDisplay9 (){
     digitalWrite(leftLED7, HIGH);     
 }
 
-//make right side display numbers 0 through 9 
+//Calls the correct functions for each individual LED of the ones digit of the display 
+// in quick succession to turn on the correct LEDs and display the numbers 0 though 9
 void rightDisplay0 () {
   rightLED1 ();
   delay(d);
@@ -301,16 +333,21 @@ void rightDisplay9 () {
   delay(d);
 }
 
+
+// Resets the count of times the button has been pressed and sets the
+// current interval's count to the previous interval's count to be displayed
+// also display the previous interval's count in the console 
 void counterReset() {
-  timeCount = millis ();
   previousCount = count;
   count = 0; 
   Serial.println(previousCount);
 }
 
+// Runs once as the Arduino is plugged in
 void setup() {
+  // Starts console 
   Serial.begin(9600);
-
+// Sets each pin for the tens digit LEDs to output 
   pinMode(leftLED1, OUTPUT);
   pinMode(leftLED2, OUTPUT);
   pinMode(leftLED3, OUTPUT);
@@ -319,23 +356,26 @@ void setup() {
   pinMode(leftLED6, OUTPUT);
   pinMode(leftLED7, OUTPUT);
   pinMode(buttonPin, INPUT);
-
+  
+// Uses the timer t available from the timer header file to run the counterReset
+// funtion every timeBase (in milliseconds)
   t.every(timeBase, counterReset, NULL);
 }
 
-
+// Will continue to run as long as the Arduino is plugged in
 void loop() {
-
+// Updates the timer t, to keep in running in the setup function
   t.update();
 
+// Reads the state of the button and sets buttonNew to 1 when unpressed or 0 when pressed 
+// then checks when the button goes from pressed to unpressed, and adds to the count of button presses
   buttonNew = digitalRead(buttonPin);
-
-
   if(buttonOld == 0 && buttonNew == 1){
     count++;
     delay(delayTime);
   }
-
+// Determines the numbers to be displayed in the tens and ones digit on the display based on the 
+// first and second digit of the count being displayed 
   if(previousCount < 10) {
       leftDisplayNum = 0;
       rightDisplayNum = previousCount;    
@@ -345,7 +385,7 @@ void loop() {
   }
 
 
-
+// Calls the correct functions to display the numbers 0 through 9 in the tens digit of the display
   if(leftDisplayNum == 0) {
     leftDisplay0 (); 
   }
@@ -377,6 +417,7 @@ void loop() {
     leftDisplay9 ();
   }
 
+// Calls the correct functions to display the numbers 0 through 9 in the ones digit of the display
   if(rightDisplayNum == 0) {
     rightDisplay0 ();   
   }
@@ -409,7 +450,8 @@ if(rightDisplayNum == 9) {
 }
 
 
- 
+// Sets the previous value of the button status to the new value to be compared in 
+//the next loop iteration 
 buttonOld = buttonNew;
 
 }
