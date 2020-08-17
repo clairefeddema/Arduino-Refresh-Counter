@@ -25,7 +25,7 @@ int timeCount = 0;
 
 int leftDisplayNum = 0;
 int rightDisplayNum = 0;
-
+ 
 
 // charlieplexing for each LED on the right side to turn on 
 void rightLED1 () {
