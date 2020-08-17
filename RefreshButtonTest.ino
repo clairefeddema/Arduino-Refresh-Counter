@@ -1,3 +1,8 @@
+/* currently inactive version 
+attempts to create refresh counter without the use of header files for the timer 
+*/
+
+
 int leftLED1 = 9;
 int leftLED2 = 11;
 int leftLED3 = 10;
