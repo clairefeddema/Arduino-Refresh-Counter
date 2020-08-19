@@ -214,6 +214,10 @@ void leftDisplay9 (){
 
 //Calls the correct functions for each individual LED of the ones digit of the display 
 // in quick succession to turn on the correct LEDs and display the numbers 0 though 9
+
+// Delays are needed between function calls for each LED otherwise LEDs that are not called turn on
+// don't know why or how it works but it does with delays 
+
 void rightDisplay0 () {
   rightLED1 ();
   delay(d);
